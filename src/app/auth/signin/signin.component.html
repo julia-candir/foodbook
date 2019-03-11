@@ -1,0 +1,12 @@
+<form #f="ngForm">
+  <div class="form-group">
+    <label for="email">Mail</label>
+    <input class="form-control" name="email" id="email" type="email" ngModel />
+  </div>
+  <div class="form-grou">
+    <label for="password">Password</label>
+    <input class="form-control" name="password" id="password" type="password" ngModel />
+  </div>
+  <hr />
+  <button class="btn btn-primary" (click)="onSignin(f)" [disabled]="!f.valid">Sign In</button>
+</form>
