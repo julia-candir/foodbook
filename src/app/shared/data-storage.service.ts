@@ -1,36 +1,49 @@
 import { AuthService } from './../auth/auth.service';
 import { RecipeService } from './../recipes/recipe.service';
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { Response } from '@angular/http';
 import { Recipe } from '../recipes/recipe.model';
 import 'rxjs/Rx';
+import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 
 @Injectable()
 export class DataStorageService {
-  constructor(private http: Http, private recipeService: RecipeService, private authService: AuthService) {}
+  constructor(private httpClient: HttpClient, private recipeService: RecipeService, private authService: AuthService) {}
 
   storeRecipes() {
-    const token = this.authService.getToken();
-
-    return this.http.put(
-      'https://ng-food-book-2ac3c.firebaseio.com/recipes.json?auth=' + token,
+    const req = new HttpRequest(
+      'PUT',
+      'https://ng-food-book-2ac3c.firebaseio.com/recipes.json',
       this.recipeService.getRecipes(),
+      { reportProgress: true },
     );
+    return this.httpClient.request(req);
+
+    // return this.httpClient.put(
+    //   'https://ng-food-book-2ac3c.firebaseio.com/recipes.json',
+    //   this.recipeService.getRecipes(),
+    //   {
+    //     observe: 'body',
+    //     params: new HttpParams().set('auth', token),
+    //     // headers: new HttpHeaders().set('Auth', 'Bearer d;fgkdgkdfgk')
+    //   },
+    // );
   }
 
   getRecipes() {
-    const token = this.authService.getToken();
-    console.log(token);
-
-    this.http
-      .get('https://ng-food-book-2ac3c.firebaseio.com/recipes.json?auth=' + token)
-      .map((response: Response) => {
-        const recipes: Recipe[] = response.json();
+    this.httpClient
+      // .get<Recipe[]>('https://ng-food-book-2ac3c.firebaseio.com/recipes.json?auth=' + token)
+      .get<Recipe[]>('https://ng-food-book-2ac3c.firebaseio.com/recipes.json', {
+        observe: 'body',
+        responseType: 'json',
+      })
+      .map(recipes => {
         for (let recipe of recipes) {
           if (!recipe['ingredients']) {
             recipe['ingredients'] = [];
           }
         }
+
         return recipes;
       })
       .subscribe((recipes: Recipe[]) => {
